@@ -40,8 +40,42 @@ class ModelTrainer:
                 "XGBRegressor": XGBRegressor()
             }
 
+            params = {
+                "LinearRegression": {
+                    "fit_intercept": [True, False]
+                },
+                "KNeighborsRegressor": {
+                    "p": [1, 2], 
+                    "n_neighbors": [1, 2, 3]
+                },
+                "DecisionTreeRegressor": {
+                    "criterion":["squared_error", "friedman_mse", "absolute_error", "poisson"]
+                },
+                "RandomForestRegressor": {
+                    "n_estimators": [64, 128, 256, 512, 1024]
+                },
+                "GradientBoostingRegressor": {
+                    "learning_rate":[.1, .01, .05, .001],
+                    "subsample":[0.6, 0.7, 0.75, 0.8, 0.85, 0.9],
+                    "n_estimators": [64, 128, 256, 512, 1024]
+                },
+                "AdaBoostRegressor": {
+                    "learning_rate":[.1, .01, .05, .001],
+                    "n_estimators": [64, 128, 256, 512, 1024]
+                },
+                "CatBoostRegressor": {
+                    "learning_rate":[.1, .01, .05, .001],
+                    "depth": [6, 8, 10],
+                    "iterations": [25, 50, 100]
+                },
+                "XGBRegressor": {
+                    "learning_rate":[.1, .01, .05, .001],
+                    "n_estimators": [64, 128, 256, 512, 1024]
+                },
+            }
+
             logging.info("Training and evaluating models")
-            model_report = evaluate_models(X_train, y_train, X_test, y_test, models=models)
+            model_report = evaluate_models(X_train, y_train, X_test, y_test, models=models, params=params)
 
             best_model_name, best_score = max(
                 ((name, scores["test_score"]) for name, scores in model_report.items()),
