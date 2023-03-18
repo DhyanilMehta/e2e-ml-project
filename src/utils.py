@@ -6,8 +6,20 @@ from sklearn.metrics import r2_score
 from sklearn.model_selection import GridSearchCV
 
 from src.exceptions import CustomException
-from src.logger import logging
+from src.logger import get_logger
 
+logger = get_logger(__name__)
+
+
+def load_obj(file_path: str):
+    try:
+        with open(file_path, "rb") as f:
+            obj = dill.load(f)
+    
+    except Exception as e:
+        raise CustomException(e, sys)
+    
+    return obj
 
 def save_obj(obj: object, file_path: str):
     try:
@@ -26,7 +38,7 @@ def evaluate_models(X_train, y_train, X_test, y_test, models, params=None):
         for model_name, model in tqdm(models.items(), desc="Training and evaluating"):
             
             if params:
-                logging.info("Performing hyper-parameter tuning using grid search")
+                logger.info("Performing hyper-parameter tuning using grid search")
                 
                 param = params[model_name]
                 grid_search = GridSearchCV(model, param)

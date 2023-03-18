@@ -9,9 +9,11 @@ from sklearn.impute import SimpleImputer
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-from src.logger import logging
+from src.logger import get_logger
 from src.exceptions import CustomException
 from src.utils import save_obj
+
+logger = get_logger(__name__)
 
 
 @dataclass
@@ -38,8 +40,8 @@ class DataTransformation:
             ColumnTransformer: Returns a ColumnTransformer with preprocessing pipelines for numerical and categorical features
         """
         try:
-            logging.info(f"Numerical features: {numerical_features}")
-            logging.info(f"Categorical features: {categorical_features}")
+            logger.info(f"Numerical features: {numerical_features}")
+            logger.info(f"Categorical features: {categorical_features}")
 
             numerical_pipeline = Pipeline(
                 steps=[
@@ -47,7 +49,7 @@ class DataTransformation:
                     ("scaler", StandardScaler()),
                 ]
             )
-            logging.info("Numerical features pipeline created")
+            logger.info("Numerical features pipeline created")
 
             categorical_pipeline = Pipeline(
                 steps=[
@@ -56,13 +58,13 @@ class DataTransformation:
                     ("scaler", StandardScaler(with_mean=False)),
                 ]
             )
-            logging.info("Categorical features pipeline created")
+            logger.info("Categorical features pipeline created")
 
             data_transformer = ColumnTransformer([
                 ("numerical_pipeline", numerical_pipeline, numerical_features),
                 ("categorical_pipeline", categorical_pipeline, categorical_features)
             ])
-            logging.info("Data transformer created by combining pipelines")
+            logger.info("Data transformer created by combining pipelines")
         
         except Exception as e:
             raise CustomException(e, sys)
@@ -73,9 +75,9 @@ class DataTransformation:
         try:
             train_df = pd.read_csv(train_data_path)
             test_df = pd.read_csv(test_data_path)
-            logging.info("Reading train and test data completed")
+            logger.info("Reading train and test data completed")
 
-            logging.info("Getting data transformer")
+            logger.info("Getting data transformer")
             target_column = "math score"
             numer_features = ["writing score", "reading score"]
             cat_features = [
@@ -91,7 +93,7 @@ class DataTransformation:
             input_feature_test_df = test_df.drop(target_column, axis=1)
             target_feature_test_df = test_df[target_column]
 
-            logging.info("Applying data transformer on train and test dataframes")
+            logger.info("Applying data transformer on train and test dataframes")
             input_feature_train_arr = data_transformer.fit_transform(input_feature_train_df)
             input_feature_test_arr = data_transformer.transform(input_feature_test_df)
 
@@ -99,7 +101,7 @@ class DataTransformation:
             test_arr = np.c_[input_feature_test_arr, np.array(target_feature_test_df)]
 
             save_obj(obj=data_transformer, file_path=self.transformation_config.data_transformer_path)
-            logging.info("Saved data transformer as a pickle file")
+            logger.info("Saved data transformer as a pickle file")
 
         except Exception as e:
             raise CustomException(e, sys)
